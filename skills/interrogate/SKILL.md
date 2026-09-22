@@ -35,7 +35,7 @@ Write one clear paragraph. If you're unsure about the intent, ask the user befor
 
 Launch all reviewers in a single message using the Task tool.
 
-**Other harnesses.** The spawns in this skill use Cursor's `Task` tool. In another harness, use its subagent tool: `Agent` in Claude Code (`subagent_type: general-purpose`), `task` in OpenCode (`subagent_type: general`), `spawn_agent` in Codex. Keep the prompt and the model. Drop parameters your tool doesn't have. If your harness has no subagent tool, as in Pi without an extension, run each reviewer yourself, one after another.
+**Other harnesses.** The spawns in this skill use Cursor's `Task` tool. In another harness, use its subagent tool: `Agent` in Claude Code (`subagent_type: general-purpose`), `task` in OpenCode (`subagent_type: general`), `spawn_agent` in Codex, `run_subagent` in Devin (`profile: subagent_general`, or `subagent_explore`/`pstack-explore` for enforced read-only reviewers). Keep the prompt and the model. Drop parameters your tool doesn't have. If your harness has no subagent tool, as in Pi without an extension, run each reviewer yourself, one after another. In Devin, `run_subagent` takes a profile, not a model: `inherit-parent`/`auto` mean `subagent_general` (the parent model); a concrete slug means a custom profile that pins `model:`.
 
 Use the `interrogate reviewers` list from the pstack settings file when present (`~/.cursor/rules/pstack-models.mdc` in Cursor, `~/.agents/pstack-models.md` in other harnesses), one reviewer per entry, extending or shrinking the Reviewer A/B/C/D labels below to the configured entry count. Otherwise use the table defaults.
 

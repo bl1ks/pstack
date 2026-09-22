@@ -16,7 +16,9 @@ Write pstack's model settings, one model per role:
 
 ### 1. Detect available models
 
-Enumerate the model slugs you can pass to a subagent in this session (Cursor `Task`, Claude Code `Agent`, OpenCode `task`, Codex `spawn_agent`). That is the dependable source. If your harness also has a command that lists the user's models, prefer it for completeness (for example `opencode models` or `pi --list-models`). If you cannot detect any, ask the user to paste the slugs they have access to. Never write a real slug you have not confirmed is available. The aliases `inherit-parent` and `auto` are always valid even though they are not detected slugs.
+Enumerate the model slugs you can pass to a subagent in this session (Cursor `Task`, Claude Code `Agent`, OpenCode `task`, Codex `spawn_agent`). That is the dependable source. If your harness also has a command that lists the user's models, prefer it for completeness (for example `opencode models`, `pi --list-models`, or `devin models list` in Devin). If you cannot detect any, ask the user to paste the slugs they have access to. Never write a real slug you have not confirmed is available. The aliases `inherit-parent` and `auto` are always valid even though they are not detected slugs.
+
+In Devin, `run_subagent` takes a subagent *profile*, not a model, so the settings file maps roles to spawn targets: `inherit-parent`/`auto` mean `subagent_general` (the parent's model), a concrete slug means a custom profile that pins `model: <slug>` (step 5 generates them under `~/.config/devin/agents/`), and a profile name such as `subagent_general`, `subagent_explore`, `pstack-explore`, or `poteto-agent` is also a valid value.
 
 ### 2. Load current state
 
@@ -24,7 +26,7 @@ The default role-to-model mapping is the rule shape shown in step 5 below. If th
 
 ### 3. Budget, map, and confirm
 
-**(a) Ask for a budget.** Prefer your structured-question tool (`AskQuestion` in Cursor, `AskUserQuestion` in Claude Code, `question` in OpenCode) over free text. Offer these four options with these exact labels, and name the current budget when the rule records one.
+**(a) Ask for a budget.** Prefer your structured-question tool (`AskQuestion` in Cursor, `AskUserQuestion` in Claude Code, `question` in OpenCode, `ask_user_question` in Devin) over free text. Offer these four options with these exact labels, and name the current budget when the rule records one. In Devin, also offer `swe-only — every role on the parent model`, which writes `inherit-parent` for every role and keeps panel lists at their configured length (one `inherit-parent` per entry, so fan-out counts are unchanged). This is the recommended Devin mode: every pstack worker then runs on the model the session was started with, e.g. `devin --model swe-2-max`.
 
 - `unlimited — keep max`
 - `large — xhigh reasoning`
@@ -41,7 +43,7 @@ Every real slug written must be in the detected set. `inherit-parent` and `auto`
 
 ### 5. Write the rule
 
-Write the settings file with a `# budget` line with the chosen label and its target effort, and one line per role, using the same labels poteto-mode uses. In Cursor, include the frontmatter below with `alwaysApply: true`. In other harnesses, write `~/.agents/pstack-models.md` without the frontmatter (start at the first `#` line). Overwrite the whole file so re-runs stay idempotent. Shape:
+Write the settings file with a `# budget` line with the chosen label and its target effort, and one line per role, using the same labels poteto-mode uses. In Cursor, include the frontmatter below with `alwaysApply: true`. In other harnesses, write `~/.agents/pstack-models.md` without the frontmatter (start at the first `#` line). Overwrite the whole file so re-runs stay idempotent. In Devin, after writing the file, generate one custom subagent profile per distinct concrete slug used: `~/.config/devin/agents/pstack-<slug>.md` with frontmatter `name: pstack-<slug>`, `description: pstack worker pinned to <slug>`, `model: <slug>`, and body "You are a pstack worker subagent. Do the task and report back."; pstack skills spawn `profile: pstack-<slug>` for those roles. Shape:
 
 ```
 ---
@@ -69,6 +71,8 @@ swarm workers: grok-4.6-fast-xhigh
 architect runners: claude-fable-5-1-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
 interrogate reviewers: claude-fable-5-1-thinking-max, gpt-5.6-sol-max, grok-4.6-fast-xhigh, claude-opus-5-thinking-xhigh
 ```
+
+A Devin `swe-only` run writes `inherit-parent` on every role line and `inherit-parent` per panel entry, for example `interrogate reviewers: inherit-parent, inherit-parent, inherit-parent, inherit-parent`. Every spawn then runs on the parent model, which turns multi-model diversity into independent-context diversity — reviewers stay independent agents with separate contexts even though the model is shared.
 
 ### 6. Confirm
 
