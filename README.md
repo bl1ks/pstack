@@ -38,6 +38,38 @@ Some skills call other skills. Install these together:
 ## What this mirror changes
 
 Many skills were Cursor-specific. They've been rewritten to work in any harness.
+
+## Devin
+
+The `devin` branch of this fork adds a thin adapter for the [Devin CLI](https://devin.ai). `pstack` maps onto Devin like this: `Task` → `run_subagent`, `generalPurpose` → the built-in `subagent_general` profile (which inherits the parent model), `poteto-agent` → a bundled custom subagent profile, `run_in_background` → `is_background: true`, and parallel `Task` calls → parallel `run_subagent` calls in one block.
+
+```bash
+# plugin install (skills are namespaced: /pstack:how, pstack:poteto-agent)
+devin plugins install --local /path/to/pstack
+
+# or user-level install (unnamespaced: /how, poteto-agent)
+ln -s /path/to/pstack/skills/* ~/.config/devin/skills/
+ln -s /path/to/pstack/agents/*.md ~/.config/devin/agents/
+
+# or declaratively with Nix / home-manager: add the repo as a flake
+# input and link skills/ and agents/ via xdg.configFile — see
+# docs/devin.md for a ready module.
+
+devin --model swe-2-max
+```
+
+Then once per user: run `/setup-pstack` and pick `swe-only` (or write `~/.agents/pstack-models.md` yourself with `inherit-parent` on every role line). After that:
+
+```
+/pstack:poteto-mode fix the scroll drift bug. repro first, then fix and verify.
+/pstack:how do we cancel runs?
+/pstack:interrogate review this diff.
+/pstack:swarm check every package under packages/. one worker per package.
+```
+
+In `swe-only` mode every delegate, explorer, reviewer, and synthesizer runs on the session's model — `devin --model swe-2-max` means SWE-2 Max everywhere and no non-SWE calls. `run_subagent` takes a *profile*, not a model, so per-role model routing resolves through profiles: `inherit-parent`/`auto` → `subagent_general`, a concrete slug → a generated profile that pins `model:` under `~/.config/devin/agents/`. Multi-model diversity becomes independent-context diversity; give reviewers distinct stances to compensate.
+
+One real constraint: Devin subagents share the parent's working tree, so parallel writers must have separate git worktrees or disjoint file sets (the `swarm`/`arena` skills already require this). Full mapping, semantics deltas, and limitations: [docs/devin.md](./docs/devin.md). Sync policy: [UPSTREAM.md](./UPSTREAM.md).
 <!-- mirror:end -->
 
 ---
