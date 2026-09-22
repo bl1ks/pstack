@@ -90,3 +90,5 @@ Devin subagents share the parent's working tree — there is no per-subagent iso
 - Resumed subagents always run in the foreground.
 - Plugin subagents load in the local CLI/Desktop only, not in Devin cloud sessions.
 - `devin doctor`'s "custom subagent profiles" check only inspects user/project dirs — plugin-bundled profiles don't show there, but they are registered (visible in-session and via `devin plugins info`).
+- `devin doctor` warns `unsupported frontmatter key(s) ignored: is_background` on `poteto-agent` — the field is Cursor's (background-by-default) and inert on Devin, where background is a per-call `is_background` argument instead. Harmless; kept for upstream parity.
+- In non-interactive `-p` runs, reads outside the workspace (`~/.agents/pstack-models.md`, transcript dirs) need `--permission-mode dangerous` or interactive approval.
