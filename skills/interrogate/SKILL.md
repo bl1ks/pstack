@@ -61,12 +61,14 @@ Read `references/reviewer-prompt.md` and fill in the template with:
 
 The same filled template goes to all reviewers, so every model applies the code-quality lens.
 
+When several reviewers share one model (`inherit-parent`/`auto` entries, or any repeated slug), diversity comes from independent contexts rather than model differences. Give each such reviewer a distinct stance appended to its prompt — for a four-reviewer panel: A takes correctness and edge cases, B architecture and ownership, C minimalism and deletion opportunities, D adversarial concerns (security, concurrency, failure modes). Distinct stances keep same-model reviews from collapsing into four copies of one review.
+
 ## Step 4, Synthesize
 
 As results come back, build a unified picture:
 
 1. **Parse all findings** from the reviewers
-2. **Identify consensus**. Findings raised by 2+ models independently are highest signal.
+2. **Identify consensus**. Findings raised by 2+ models independently are highest signal. On a shared-model panel, agreement across reviewers is correlated rather than independent — say so in the verdict and lean on concrete reproductions over vote counts.
 3. **Identify lone-model findings**. Still worth reading, but weight accordingly.
 4. **Deduplicate**. Different models may describe the same issue differently. Merge these and note which models raised it.
 5. **Note disagreements**. If one model flags something and another explicitly says the opposite, that's useful context for the verdict.
